@@ -1,0 +1,14 @@
+# FROM zmkfirmware/zmk-dev-arm:3.5
+ARG IMAGE
+FROM ${IMAGE}
+
+# zmk
+RUN mkdir /zmk-firmware/config /zmk-firmware/build/test -p
+COPY config /zmk-firmware/config
+WORKDIR /zmk-firmware
+RUN west init -l /zmk-firmware/config/ && west update && west zephyr-export
+
+COPY build_fish.py /zmk-firmware
+RUN chmod +x /zmk-firmware/build_fish.py
+
+CMD [ "/bin/bash" ]

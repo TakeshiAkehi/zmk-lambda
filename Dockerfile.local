@@ -1,0 +1,10 @@
+ARG IMAGE
+FROM ${IMAGE}
+
+RUN mkdir -p /root/.aws-lambda-rie && curl -Lo /root/.aws-lambda-rie/aws-lambda-rie \
+https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie \
+&& chmod +x /root/.aws-lambda-rie/aws-lambda-rie  
+
+ENTRYPOINT ["/root/.aws-lambda-rie/aws-lambda-rie", "/usr/bin/python3", "-m", "awslambdaric" ]
+
+CMD [ "app.handler" ]

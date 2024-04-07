@@ -1,0 +1,22 @@
+# Copyright (c) 2021 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+# 親機にしたい方をコメントアウト
+if SHIELD_$TEMPLATE$_LEFT
+# if SHIELD_$TEMPLATE$_RIGHT
+
+config ZMK_KEYBOARD_NAME
+    default "Fish Keyboard"
+
+config ZMK_SPLIT_ROLE_CENTRAL
+    default y
+
+endif
+
+
+if SHIELD_$TEMPLATE$_LEFT || SHIELD_$TEMPLATE$_RIGHT
+
+config ZMK_SPLIT
+    default y
+
+endif
