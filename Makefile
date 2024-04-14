@@ -20,9 +20,15 @@ CONTAINER_NAME_LOCAL=$(CONTAINER_BASENAME)-local
 # docker image
 build:
 	docker build --platform linux/amd64 -t $(IMAGE_NAME_ZMK)  -f Dockerfile.zmk --build-arg IMAGE=$(BASEIMAGE) .
-	docker build --platform linux/amd64 -t $(IMAGE_NAME_PROD)  -f Dockerfile.prod --build-arg IMAGE=$(IMAGE_NAME_ZMK) .
-	docker build --platform linux/amd64 -t $(IMAGE_NAME_LOCAL)  -f Dockerfile.local --build-arg IMAGE=$(IMAGE_NAME_PROD) .
+	docker build --platform linux/amd64 -t $(IMAGE_NAME_PROD)  -f Dockerfile.prod --build-arg IMAGE=$(IMAGE_NAME_ZMK)  .
+	docker build --platform linux/amd64 -t $(IMAGE_NAME_LOCAL)  -f Dockerfile.local --build-arg IMAGE=$(IMAGE_NAME_PROD)  .
 
+rebuild:
+	docker build --platform linux/amd64 -t $(IMAGE_NAME_ZMK)  -f Dockerfile.zmk --build-arg IMAGE=$(BASEIMAGE) --no-cache .
+	docker build --platform linux/amd64 -t $(IMAGE_NAME_PROD)  -f Dockerfile.prod --build-arg IMAGE=$(IMAGE_NAME_ZMK)  .
+	docker build --platform linux/amd64 -t $(IMAGE_NAME_LOCAL)  -f Dockerfile.local --build-arg IMAGE=$(IMAGE_NAME_PROD)  .
+
+# docker build --platform linux/amd64 -t $(IMAGE_NAME_ZMK)  -f Dockerfile.zmk --build-arg IMAGE=$(BASEIMAGE) --no-cache .
 # zmk debug
 zmk:
 	docker run --rm -it --name $(CONTAINER_NAME_ZMK) $(IMAGE_NAME_ZMK) /bin/bash
@@ -39,7 +45,10 @@ curl:
 	curl -d '{}' http://localhost:9000/2015-03-31/functions/function/invocations
 
 curl2:
-	curl -d '{"mode":"test"}' http://localhost:9000/2015-03-31/functions/function/invocations
+	curl -d '{"userid":"test"}' http://localhost:9000/2015-03-31/functions/function/invocations
+
+curl3:
+	curl -d '{"userid":"random"}' http://localhost:9000/2015-03-31/functions/function/invocations
 
 # prod
 push:
