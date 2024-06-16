@@ -1,0 +1,167 @@
+// キーに入力を割り当てる
+// 視覚的に編集できるツールは https://o24.works/fish/editor から
+
+
+// 定義を呼んでくる
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/mouse.h>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/outputs.h>
+
+// 複合キーの挙動を調整できる
+
+&mt {
+    flavor = "tap-preferred";
+    tapping-term-ms = <200>;
+    quick-tap-ms = <200>;
+};
+
+&lt {
+    flavor = "balanced";
+    tapping-term-ms = <200>;
+    quick-tap-ms = <200>;
+};
+
+&sk {
+    release-after-ms = <1000>;
+};
+
+&sl {
+    release-after-ms = <1000>;
+};
+
+
+/ {
+    // 独自の入力を定義できる（上級者向け）
+
+    behaviors {
+        mcap: behavior_mo_tog {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <200>;
+            bindings = <&kp>, <&caps_word>;
+        };
+    };
+
+    macros {
+    };
+
+
+    // 複数キーの同時押しに特別の入力を設定できる
+    // キー番号早見表：
+    //       0  1  2  3     4  5  6  7
+    // 8  9 10 11 12 13    14 15 16 17 18 19
+    //   20 21 22 23          24 25 26 27
+    //            28 29    30 31
+
+    combos {
+        compatible = "zmk,combos";
+        timeout-ms = <100>;
+
+        combo_sl_4 {
+            key-positions = <0 1 2>;
+            bindings = <&sl 4>;
+        };
+
+        combo_esc {
+            key-positions = <0 1>;
+            bindings = <&kp ESC>;
+        };
+
+        combo_mo_2 {
+            key-positions = <10 11>;
+            bindings = <&mo 2>;
+        };
+
+        combo_bspc {
+            key-positions = <15 16>;
+            bindings = <&kp BSPC>;
+        };
+
+        combo_del {
+            key-positions = <24 25>;
+            bindings = <&kp DEL>;
+        };
+
+        combo_ret {
+            key-positions = <16 17>;
+            bindings = <&kp RET>;
+        };
+
+        combo_comma {
+            key-positions = <5 15>;
+            bindings = <&kp COMMA>;
+        };
+
+        combo_dot {
+            key-positions = <6 16>;
+            bindings = <&kp DOT>;
+        };
+
+        combo_semi {
+            key-positions = <7 17>;
+            bindings = <&kp SEMI>;
+        };
+
+        combo_mo_2_2 {
+            key-positions = <11 12>;
+            bindings = <&mo 2>;
+        };
+    };
+    
+
+    // キーを割り当てる
+    // 型（&...）は https://zmk.dev/docs/behaviors/... を参照
+    // キーコードは https://zmk.dev/docs/codes/... を参照
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        layer_default {
+            bindings = <
+                        &kp W       &kp U       &kp F       &kp MINUS           &kp K       &kp L       &kp R       &kp Y       
+&mt LGUI Q  &mt LCTRL E &kp I       &kp A       &kp O       &kp PRCNT           &kp G       &kp T       &kp N       &kp S       &kp H       &kp P       
+            &mt LSHFT Z &mt LALT X  &kp C       &kp V                                       &kp D       &kp M       &kp J       &mt LSHFT B 
+                                                &lt 3 TAB   &mt LCTRL SPACE     &lt 1 SPACE &mcap LALT  0
+            >;
+        };
+
+        layer_nav {
+            bindings = <
+                        &kp N4      &kp N5      &kp N6      &mkp MB4            &kp K_APP   &kp PG_DN   &kp UP      &kp PG_UP   
+&kp LGUI    &mt LCTRL N0 &kp N1     &kp N2      &kp N3      &mkp MB5            &kp K_APP   &kp LEFT    &kp DOWN    &kp RIGHT   &kp LALT    &kp LGUI    
+            &mt LSHFT N0 &mt LALT N7 &kp N8     &kp N9                                      &kp LC(PG_UP) &kp LC(PG_DN) &kp HOME &kp END    
+                                                &lt 3 TAB   &kp SPACE           &trans      &trans      
+            >;
+        };
+
+        layer_fun {
+            bindings = <
+                        &kp F11     &kp F12     &kp LS(F5)  &kp F5              &kp DOT     &kp N7      &kp N8      &kp N9      
+&trans      &mt LCTRL F1 &kp F2     &kp F3      &kp F4      &kp F10             &kp COMMA   &kp N4      &kp N5      &kp N6      &kp N0      &kp MINUS   
+            &mt LSHFT F6 &mt LALT F7 &kp F8     &kp F9                                      &kp N1      &kp N2      &kp N3      &kp N0      
+                                                &lt 3 TAB   &kp SPACE           &kp SPACE   &kp LALT    
+            >;
+        };
+
+        layer_sym {
+            bindings = <
+                        &kp AT      &kp HASH    &kp DLLR    &kp LBRC            &kp RBRC    &kp AMPS    &kp STAR    &kp UNDER   
+&kp TILDE   &mt LCTRL EXCL &kp LBKT &kp LPAR    &kp COLON   &kp PIPE            &kp CARET   &kp FSLH    &kp RPAR    &kp RBKT    &mt LCTRL EQUAL &kp PLUS 
+            &kp GRAVE   &kp LT      &kp MINUS   &kp GT                                      &kp QMARK   &kp DQT     &kp SQT     &kp BSLH    
+                                                &trans      &trans              &kp SPACE   &kp LALT    
+            >;
+        };
+
+        layer_adj {
+            bindings = <
+                        &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_CLR       &trans      &trans      &trans      &trans      
+&trans      &out OUT_BLE &bt BT_SEL 3 &bt BT_SEL 4 &trans   &bt BT_CLR          &trans      &trans      &trans      &trans      &trans      &trans      
+            &out OUT_USB &trans     &trans      &trans                                      &trans      &trans      &trans      &trans      
+                                                &trans      &trans              &trans      &trans      
+            >;
+        };
+    };
+};

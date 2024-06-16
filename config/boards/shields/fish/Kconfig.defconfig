@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: MIT
 
 # 親機にしたい方をコメントアウト
-if SHIELD_$TEMPLATE$_LEFT
-# if SHIELD_$TEMPLATE$_RIGHT
+if SHIELD_FISH_LEFT
+# if SHIELD_FISH_RIGHT
 
 config ZMK_KEYBOARD_NAME
     default "Fish Keyboard"
@@ -14,7 +14,7 @@ config ZMK_SPLIT_ROLE_CENTRAL
 endif
 
 
-if SHIELD_$TEMPLATE$_LEFT || SHIELD_$TEMPLATE$_RIGHT
+if SHIELD_FISH_LEFT || SHIELD_FISH_RIGHT
 
 config ZMK_SPLIT
     default y

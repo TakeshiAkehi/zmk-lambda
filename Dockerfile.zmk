@@ -9,8 +9,10 @@ RUN mkdir /zmk-firmware/config  -p
 COPY config /zmk-firmware/config
 WORKDIR /zmk-firmware
 RUN west init -l /zmk-firmware/config/ && west update 
-COPY build_fish.py /zmk-firmware
-RUN chmod +x /zmk-firmware/build_fish.py
-# ENV ZEPHYR_BASE=/zmk-firmware
+
+# create build cache
+COPY build_uf2.sh /zmk-firmware/build_uf2.sh
+RUN /bin/bash /zmk-firmware/build_uf2.sh left
+RUN /bin/bash /zmk-firmware/build_uf2.sh right
 
 CMD [ "/bin/bash" ]

@@ -1,5 +1,5 @@
 
-#include "$template$.dtsi"
+#include "fish.dtsi"
 
 &default_transform {
     col-offset = <4>;
