@@ -12,7 +12,7 @@ RUN west init -l /zmk-firmware/config/ && west update
 
 # create build cache
 COPY build_uf2.sh /zmk-firmware/build_uf2.sh
-RUN /bin/bash /zmk-firmware/build_uf2.sh left
-RUN /bin/bash /zmk-firmware/build_uf2.sh right
+RUN /bin/bash /zmk-firmware/build_uf2.sh left && rm /zmk-firmware/config/boards/shields/fish/fish.keymap
+RUN /bin/bash /zmk-firmware/build_uf2.sh right && rm /zmk-firmware/config/boards/shields/fish/fish.keymap
 
 CMD [ "/bin/bash" ]

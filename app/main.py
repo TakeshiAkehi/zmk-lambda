@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Union
 
 import builder
@@ -14,12 +15,16 @@ def read_root():
 
 @app.get("/test1")
 def read_test():
-    return {"Hello": "World"}
+    path = Path(__file__).parent / "work/fish.keymap"
+    builder.build(path)
+    return {"build": "1"}
 
 
 @app.get("/test2")
 def read_test():
-    return {"Hello": "World"}
+    path = Path(__file__).parent / "work/fish2.keymap"
+    builder.build(path)
+    return {"build": "2"}
 
 
 if __name__ == "__main__":

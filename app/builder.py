@@ -3,6 +3,7 @@ import random
 import shutil
 import string
 import subprocess
+import time
 from pathlib import Path
 
 IMAGE_NAME = "zmk-api:latest"
@@ -21,6 +22,7 @@ def build(keymap_file):
 
     print(f"building on container {container}")
     pc = subprocess.Popen(f"docker run --rm --name {container} {IMAGE_NAME} tail -F /dev/null", shell=True)
+    time.sleep(3)
     pc_tx = subprocess.run(
         f"docker cp {str(keymap_file)} {container}:/zmk-firmware/config/boards/shields/fish/fish.keymap", shell=True
     )
