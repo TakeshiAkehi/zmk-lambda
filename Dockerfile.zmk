@@ -2,7 +2,7 @@
 ARG IMAGE
 FROM ${IMAGE}
 
-ENV HOME="/tmp"
+ENV HOME="/zmk-firmware"
 
 # zmk
 RUN mkdir /zmk-firmware/config  -p

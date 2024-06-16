@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 # ZMKROOT = Path(__file__).parent
-# ZMKROOT = Path("/zmk-firmware")
-ZMKROOT = Path("/tmp/zmk-firmware")
+ZMKROOT = Path("/zmk-firmware")
+# ZMKROOT = Path("/tmp/zmk-firmware")
 
 
 def create_shield_config(template_dir: Path, shields_dir: Path, shield: str):
@@ -98,10 +98,10 @@ def exec_build_lr(appdir, board, build_dir, shield, confdir):
 
 
 def main(shield: str):
-    TMP_DIR = Path("/tmp")
-    CONFIG_DIR = TMP_DIR / "config"
+    # TMP_DIR = Path("/tmp")
+    CONFIG_DIR = ZMKROOT / "config"
     SHIELDS_DIR = CONFIG_DIR / "boards" / "shields"
-    BUILD_DIR = TMP_DIR / "build"
+    BUILD_DIR = ZMKROOT / "build"
 
     TEMPLATE_DIR = ZMKROOT / "config" / "boards" / "shields" / "template"
     APP_DIR = ZMKROOT / "zmk" / "app"
