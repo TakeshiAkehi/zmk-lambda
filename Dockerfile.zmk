@@ -2,6 +2,7 @@
 ARG IMAGE
 FROM ${IMAGE}
 
+ARG SIDE
 ENV HOME="/zmk-firmware"
 
 # zmk
@@ -12,7 +13,11 @@ RUN west init -l /zmk-firmware/config/ && west update
 
 # create build cache
 COPY build_uf2.sh /zmk-firmware/build_uf2.sh
-RUN /bin/bash /zmk-firmware/build_uf2.sh left && rm /zmk-firmware/config/boards/shields/fish/fish.keymap
-RUN /bin/bash /zmk-firmware/build_uf2.sh right && rm /zmk-firmware/config/boards/shields/fish/fish.keymap
+COPY constants.sh /zmk-firmware/constants.sh
+COPY load_constants.sh /zmk-firmware/load_constants.sh
+COPY config/boards/shields/fish/fish.keymap /zmk-firmware/fish.keymap
+RUN /bin/bash /zmk-firmware/build_uf2.sh $SIDE && \
+        rm /zmk-firmware/config/boards/shields/fish/fish.keymap  &&\
+        rm /zmk-firmware/build/
 
 CMD [ "/bin/bash" ]

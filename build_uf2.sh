@@ -1,6 +1,10 @@
 #/bin/bash
 
 echo "left/right = $1"
+if [ $# -ne 1 ]; then
+  echo "left/right not specified"
+  exit 1
+fi
 
 ZMK_ROOT="/zmk-firmware"
 SHIELD_BASE="fish"

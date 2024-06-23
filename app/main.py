@@ -4,8 +4,13 @@ from typing import Union
 import builder
 import uvicorn
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
+
+
+class buildRequest(BaseModel):
+    keymap: str
 
 
 @app.get("/")
@@ -13,16 +18,15 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/test1")
+@app.get("/test")
 def read_test():
     path = Path(__file__).parent / "work/fish.keymap"
     builder.build(path)
     return {"build": "1"}
 
 
-@app.get("/test2")
-def read_test():
-    path = Path(__file__).parent / "work/fish2.keymap"
+@app.post("/build")
+def build_on_post(build_request: buildRequest):
     builder.build(path)
     return {"build": "2"}
 

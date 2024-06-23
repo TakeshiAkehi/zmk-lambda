@@ -1,58 +1,153 @@
+import io
+import logging
 import os
 import random
 import shutil
 import string
 import subprocess
 import time
+from dataclasses import dataclass
+from enum import Enum, auto
 from pathlib import Path
 
-IMAGE_NAME = "zmk-api:latest"
+LOGGER = logging.getLogger(__name__)
 CDIR = Path(__file__).parent
 BUILD_DIR = CDIR / "work"
+IMAGE_NAME_LEFT = "zmk-api:left"
+IMAGE_NAME_RIGHT = "zmk-api:right"
+
+
+class Side(Enum):
+    left = "left"
+    right = "right"
+
+
+@dataclass
+class Result:
+    result: bool
+    msg: str
+    data: object
+
+
+# util
+def run_on_shell(command):
+    p = subprocess.run(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    return p.stdout.decode("utf-8").split("\n")
+
+
+def open_on_shell(command):
+    p = subprocess.Popen(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    return p
 
 
 def randomname(n):
     return "".join(random.choices(string.ascii_letters + string.digits, k=n))
 
 
-def build(keymap_file):
-    container = f"zmk-{randomname(16)}"
-    workdir = BUILD_DIR / container
-    os.makedirs(workdir)
+def wait_until(condition_func, timeout):
+    loopcnt = 0
+    while not condition_func():
+        time.sleep(1)
+        loopcnt += 1
+        if loopcnt > timeout:
+            return False
+    return True
 
-    print(f"building on container {container}")
-    pc = subprocess.Popen(f"docker run --rm --name {container} {IMAGE_NAME} tail -F /dev/null", shell=True)
-    time.sleep(3)
-    pc_tx = subprocess.run(
-        f"docker cp {str(keymap_file)} {container}:/zmk-firmware/config/boards/shields/fish/fish.keymap", shell=True
+
+# docker func
+def docker_cp(container_name, src, dst):
+    return run_on_shell(f"docker cp {src} {container_name}:{dst}")
+
+
+def docker_push_keymap(container_name, src):
+    return run_on_shell(f"docker cp {src} {container_name}:/zmk-firmware/config/boards/shields/fish/fish.keymap")
+
+
+def docker_pull_uf2(container_name, dstpath, side: Side):
+    return run_on_shell(
+        f"docker cp {container_name}:/zmk-firmware/build/fish_{side.value}/zephyr/zmk.uf2 {str(dstpath)}"
     )
 
-    print(f"building left...")
-    pc_l = subprocess.run(
-        f"docker exec {container} /bin/bash build_uf2.sh left",
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    print(pc_l.stdout.decode())
-    subprocess.run(
-        f"docker cp {container}:/zmk-firmware/build/fish_left/zephyr/zmk.uf2 {str(workdir)}/fish_left.uf2", shell=True
-    )
 
-    print(f"building right...")
-    pc_r = subprocess.run(
-        f"docker exec {container} /bin/bash build_uf2.sh right",
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    print(pc_r.stdout.decode())
-    subprocess.run(
-        f"docker cp {container}:/zmk-firmware/build/fish_right/zephyr/zmk.uf2 {str(workdir)}/fish_right.uf2", shell=True
-    )
-    subprocess.run(f"docker rm -f {container}", shell=True)
+def docker_check_if_running(container_name):
+    s = run_on_shell(f"docker ps -q -f name={container_name}")
+    ret = (len(s) == 2) and (len(s[0]) == 12) and s[1] == ""
+    return ret
+
+
+class buildContainer:
+    def __init__(self, keymap: str, side: Side):
+        self.keymap = keymap
+        self.side = side
+        self.container_name = f"zmk-{randomname(16)}"
+        self.workdir = BUILD_DIR / self.container_name
+        self.IMAGE_NAME = IMAGE_NAME_LEFT if side == Side.left else IMAGE_NAME_RIGHT
+
+    def __enter__(self):
+        os.makedirs(self.workdir)
+        open_on_shell(f"docker run --rm --name {self.container_name} {self.IMAGE_NAME} tail -F /dev/null")
+        return self
+
+    def exec_build(self):
+        container_name = self.container_name
+        keymap_file = self.workdir / "fish.keymap"
+        side = self.side
+
+        with open(keymap_file, "w") as f:
+            f.write(self.keymap)
+
+        LOGGER.info(f"building on container_name {self.container_name}")
+        if not wait_until(lambda: docker_check_if_running(container_name=container_name), timeout=10):
+            return Result(False, "timeout to container up", None)
+
+        docker_push_keymap(container_name=container_name, src=str(keymap_file))
+        build_log = run_on_shell(f"docker exec {container_name} /bin/bash build_uf2.sh {side.value}")
+        LOGGER.info(build_log)
+        uf2_path = self.workdir / f"{side.value}.uf2"
+        docker_pull_uf2(container_name=container_name, dstpath=str(uf2_path), side=self.side)
+
+        # load on memory
+        with open(uf2_path, "rb") as f:
+            uf2_object = io.BytesIO(f.read())
+        return Result(True, "built uf2", {"uf2": uf2_object, "log": build_log})
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        # shutil.rmtree(self.workdir)
+        run_on_shell(f"docker stop {self.container_name}")
+
+
+def build(keymap: str):
+    with buildContainer(keymap=keymap, side=Side.left) as container:
+        res1 = container.exec_build()
+        LOGGER.info(res1.msg)
+    with buildContainer(keymap=keymap, side=Side.right) as container:
+        res2 = container.exec_build()
+        LOGGER.info(res2.msg)
+    if not res1.result or not res2.result:
+        return Result(False, "build failed", None)
+    return Result(True, "build success", {"left": res1.data, "right": res2.data})
+
+
+def build_from_path(keymap_file: Path):
+    with open(keymap_file) as f:
+        keymap = f.read()
+    return build(keymap)
 
 
 if __name__ == "__main__":
-    build(CDIR / "work" / "fish.keymap")
-    build(CDIR / "work" / "fish2.keymap")
+    logging.basicConfig(level=logging.DEBUG)
+    res = build_from_path(CDIR / "work" / "fish.keymap")
+    with open("left.uf2", "wb") as f:
+        f.write(res.data["left"]["uf2"].getbuffer())
+    with open("right.uf2", "wb") as f:
+        f.write(res.data["right"]["uf2"].getbuffer())

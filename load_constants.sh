@@ -1,0 +1,1 @@
+export $(cat constants.sh | grep -v ^#)
