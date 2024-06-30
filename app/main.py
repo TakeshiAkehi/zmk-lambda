@@ -1,4 +1,5 @@
 import io
+import logging
 import zipfile
 from pathlib import Path
 from typing import Union
@@ -10,6 +11,10 @@ from fastapi import FastAPI, Response
 from pydantic import BaseModel
 
 app = FastAPI()
+logging.basicConfig(level=logging.INFO)
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class buildRequest(BaseModel):

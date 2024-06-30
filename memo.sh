@@ -7,5 +7,11 @@ sudo yum install -y git make
 git clone https://github.com/TakeshiAkehi/zmk-lambda.git
 cd zmk-lambda
 source load_constants.sh
-make build
+make build_sudo
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+sudo cp fastapi.service /etc/systemd/system
+sudo systemctl daemon-reload
+
 exit
