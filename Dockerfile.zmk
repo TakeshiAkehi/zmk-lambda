@@ -18,6 +18,6 @@ COPY load_constants.sh /zmk-firmware/load_constants.sh
 COPY config/boards/shields/fish/fish.keymap /zmk-firmware/fish.keymap
 RUN /bin/bash /zmk-firmware/build_uf2.sh $SIDE && \
         rm /zmk-firmware/config/boards/shields/fish/fish.keymap  &&\
-        rm /zmk-firmware/build/
+        rm /zmk-firmware/build/* -rf
 
 CMD [ "/bin/bash" ]
