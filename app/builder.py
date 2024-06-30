@@ -6,9 +6,11 @@ import shutil
 import string
 import subprocess
 import time
+import zipfile
 from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
+from typing import List
 
 LOGGER = logging.getLogger(__name__)
 CDIR = Path(__file__).parent
@@ -106,7 +108,7 @@ class buildContainer:
         with open(keymap_file, "w") as f:
             f.write(self.keymap)
 
-        LOGGER.info(f"building on container_name {self.container_name}")
+        LOGGER.info(f"building on container_name={self.container_name}")
         if not wait_until(lambda: docker_check_if_running(container_name=container_name), timeout=10):
             return Result(False, "timeout to container up", None)
 
@@ -122,8 +124,22 @@ class buildContainer:
         return Result(True, "built uf2", {"uf2": uf2_object, "log": build_log})
 
     def __exit__(self, exception_type, exception_value, traceback):
-        # shutil.rmtree(self.workdir)
+        shutil.rmtree(self.workdir)
         run_on_shell(f"docker stop {self.container_name}")
+
+
+@dataclass
+class ZipBytes:
+    data: bytes
+    path: str
+
+
+def zipdata(zb_list=List[ZipBytes]):
+    s = io.BytesIO()
+    with zipfile.ZipFile(s, "w") as zf:
+        for zb in zb_list:
+            zf.writestr(zinfo_or_arcname=zb.path, data=zb.data.getbuffer())
+    return zf, s
 
 
 def build(keymap: str):
@@ -135,7 +151,9 @@ def build(keymap: str):
         LOGGER.info(res2.msg)
     if not res1.result or not res2.result:
         return Result(False, "build failed", None)
-    return Result(True, "build success", {"left": res1.data, "right": res2.data})
+
+    zf, s = zipdata([ZipBytes(res1.data["uf2"], "left.uf2"), ZipBytes(res2.data["uf2"], "right.uf2")])
+    return Result(True, "build success", {"zip": s.getvalue()})
 
 
 def build_from_path(keymap_file: Path):
@@ -147,7 +165,6 @@ def build_from_path(keymap_file: Path):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     res = build_from_path(CDIR / "work" / "fish.keymap")
-    with open("left.uf2", "wb") as f:
-        f.write(res.data["left"]["uf2"].getbuffer())
-    with open("right.uf2", "wb") as f:
-        f.write(res.data["right"]["uf2"].getbuffer())
+    with open("test.zip", "wb") as f:
+        f.write(res.data["zip"])
+    a = 1

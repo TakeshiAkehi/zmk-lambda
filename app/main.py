@@ -1,9 +1,12 @@
+import io
+import zipfile
 from pathlib import Path
 from typing import Union
 
 import builder
 import uvicorn
-from fastapi import FastAPI
+from builder import Result
+from fastapi import FastAPI, Response
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -18,17 +21,38 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/test")
-def read_test():
-    path = Path(__file__).parent / "work/fish.keymap"
-    builder.build(path)
-    return {"build": "1"}
+def build_sample():
+    path = Path(__file__).parent / "work" / "fish.keymap"
+    result = builder.build_from_path(path)
+    return tozip(result)
+
+
+def tozip(result: Result):
+    if result.result:
+        responce = Response(
+            result.data["zip"],
+            media_type="application/x-zip-compressed",
+            headers={"Content-Disposition": f"attachment;filename={'fish.zip'}"},
+        )
+        return responce
+    else:
+        return {"msg": "build error"}
+
+
+@app.get("/test_get")
+def test_get():
+    return build_sample()
+
+
+@app.post("/test_post")
+def test_post():
+    return build_sample()
 
 
 @app.post("/build")
-def build_on_post(build_request: buildRequest):
-    builder.build(path)
-    return {"build": "2"}
+def build(build_request: buildRequest):
+    result = builder.build(keymap=build_request.keymap)
+    return tozip(result)
 
 
 if __name__ == "__main__":
