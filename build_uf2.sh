@@ -1,10 +1,12 @@
 #/bin/bash
 
 echo "left/right = $1"
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
   echo "left/right not specified"
   exit 1
 fi
+
+echo "build arg = $2"
 
 ZMK_ROOT="/zmk-firmware"
 SHIELD_BASE="fish"
@@ -17,4 +19,4 @@ KEYMAP="${CONFIG_DIR}/boards/shields/fish/fish.keymap"
 
 touch ${KEYMAP}
 west zephyr-export
-west build -s ${APP_DIR} -b ${BOARD} -d ${BUILD_DIR} -- -DSHIELD=${SHIELD} -DZMK_CONFIG=${CONFIG_DIR}
+west build $2 -s ${APP_DIR} -b ${BOARD} -d ${BUILD_DIR} -- -DSHIELD=${SHIELD} -DZMK_CONFIG=${CONFIG_DIR}

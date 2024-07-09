@@ -5,3 +5,4 @@ app/work/zmk*
 trash
 *.uf2
 *.zip
+export/

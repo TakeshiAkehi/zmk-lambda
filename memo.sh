@@ -13,5 +13,4 @@ source .venv/bin/activate
 pip install -r requirements.txt
 sudo cp fastapi.service /etc/systemd/system
 sudo systemctl daemon-reload
-
 exit

@@ -18,6 +18,9 @@ COPY load_constants.sh /zmk-firmware/load_constants.sh
 COPY config/boards/shields/fish/fish.keymap /zmk-firmware/fish.keymap
 RUN /bin/bash /zmk-firmware/build_uf2.sh $SIDE && \
         rm /zmk-firmware/config/boards/shields/fish/fish.keymap  &&\
-        rm /zmk-firmware/build/* -rf
+        rm /zmk-firmware/build/fish_${SIDE}/zephyr/zmk.uf2
+
+# dbg
+RUN apt-get update && apt-get install -y vim
 
 CMD [ "/bin/bash" ]

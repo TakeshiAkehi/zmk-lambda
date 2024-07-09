@@ -19,6 +19,8 @@ LOGGER = logging.getLogger(__name__)
 
 class buildRequest(BaseModel):
     keymap: str
+    defconfig: Union[str, None] = None
+    conf: Union[str, None] = None
 
 
 @app.get("/")
@@ -27,7 +29,7 @@ def read_root():
 
 
 def build_sample():
-    path = Path(__file__).parent / "work" / "fish.keymap"
+    path = Path(__file__).parent / "work" / "keymap1.keymap"
     result = builder.build_from_path(path)
     return tozip(result)
 
@@ -56,7 +58,8 @@ def test_post():
 
 @app.post("/build")
 def build(build_request: buildRequest):
-    result = builder.build(keymap=build_request.keymap)
+    print(build_request)
+    result = builder.build(keymap=build_request.keymap, defconfig=build_request.defconfig, conf=build_request.conf)
     return tozip(result)
 
 

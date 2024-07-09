@@ -12,7 +12,7 @@
                         &kp W       &kp U       &kp F       &kp MINUS           &kp K       &kp L       &kp R       &kp Y       
 &mt LGUI Q  &mt LCTRL E &kp I       &kp A       &kp O       &kp PRCNT           &kp G       &kp T       &kp N       &kp S       &kp H       &kp P       
             &mt LSHFT Z &mt LALT X  &kp C       &kp V                                       &kp D       &kp M       &kp J       &mt LSHFT B 
-                                                &lt 3 TAB   &mt LCTRL SPACE     &lt 1 SPACE &mcap LALT  0
+                                                &kp TAB   &mt LCTRL SPACE     &kp SPACE &kp LALT 
             >;
         };
     };

@@ -1,11 +1,31 @@
 import json
 from pathlib import Path
 
-path = Path("/home/ake/soft/zmk-lambda/app/work/fish3.keymap")
-with open(path) as f:
-    lines = f.read()
 
-j = {"keymap": lines}
+def create_json(keymap, conf=None, defconf=None):
+    with open(keymap) as f:
+        lines = f.read()
+    j = {"keymap": lines}
+    if conf is not None:
+        with open(conf) as f:
+            lines = f.read()
+        j["conf"] = lines
 
-with open(path.with_suffix(".json"), "w") as f:
-    json.dump(j, f)
+    if defconf is not None:
+        with open(defconf) as f:
+            lines = f.read()
+        j["defconfig"] = lines
+
+    # jstr = json.dumps(j).replace("\\n", "\\n\n")
+
+    with open(WDIR / "temp.json", "w") as f:
+        json.dump(j, f)
+    #     f.write(jstr)
+
+
+WDIR = Path(__file__).parent / "work"
+keymap = WDIR / "keymap3.keymap"
+conf = WDIR / "conf2.conf"
+defconf = WDIR / "Kconfig.defconfig"
+
+create_json(keymap, conf, defconf)
