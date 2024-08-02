@@ -3,7 +3,7 @@ Description=FastAPI App
 After=network.target
 
 [Service]
-ExecStart=/home/ec2-user/zmk-lambda/.venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000
+ExecStart=/home/ec2-user/zmk-lambda/.venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
 WorkingDirectory=/home/ec2-user/zmk-lambda/app
 Restart=always
 
