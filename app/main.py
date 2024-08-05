@@ -1,5 +1,6 @@
 import io
 import logging
+import os
 import zipfile
 from pathlib import Path
 from typing import Union
@@ -8,6 +9,7 @@ import builder
 import uvicorn
 from builder import Result
 from fastapi import FastAPI, Response
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -15,6 +17,18 @@ logging.basicConfig(level=logging.INFO)
 
 
 LOGGER = logging.getLogger(__name__)
+
+
+# origins = []
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class buildRequest(BaseModel):
